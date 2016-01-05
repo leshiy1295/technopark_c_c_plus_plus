@@ -42,7 +42,7 @@ retcode_t eval_primary(std::FILE* in, double* value)
         seen_digit = true;
         cur_val = cur_val * 10 + (c - '0');
         drop_char(in);
-    };
+    }
     if (!seen_digit)
         return E_EOF;
     *value = negate ? -cur_val : cur_val;
