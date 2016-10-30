@@ -1,18 +1,16 @@
 # Работа с компилятором
 
-<img style="float: right; margin-left: 10px;" src="images/gcc.png">
+<img align="right" src="images/gcc.png">
 
 Компилятор GCC предоставляет множество опций командной строки. Полезно будет
 ознакомиться с основными из них. Список всех опций и их описание можно прочитать
 на [сайте GCC](https://gcc.gnu.org/onlinedocs/).
 
-<img style="float: left; margin-right: 10px;" src="images/llvm.png">
+<img align="left" src="images/llvm.png">
 
 Заметим что Clang во многом совместим с GCC и описанные здесь основные опции
 работают и с Clang (если явно не сказано обратное). У Clang также имеется
 подробная [документация](http://clang.llvm.org/docs/UsersManual.html).
-
-<div style="clear:both;"></div>
 
 ## Функции драйвера компилятора
 
@@ -56,7 +54,7 @@
 зависит набор стандартных библиотек, который будет по умолчанию подключен к
 программе.
 
-<img style="float: left; margin-right: 10px;" src="images/osx.png">
+<img align="left" src="images/osx.png">
 
 В операционной системе OS X за файлами `gcc` и `g++` скрывается компилятор
 Clang, существенная часть которого разработана самой компанией Apple. До того
