@@ -1,6 +1,6 @@
 # Дополнительные материалы к курсу "Углубленное программирование на C/C++"
 
-<img style="float: right; margin-left: 10px;" src="images/cpp.png">
+<img align="right" src="images/cpp.png">
 
 1. [Работа с компилятором](compiler.md)
 2. [Работа с Valgrind](valgrind.md)
