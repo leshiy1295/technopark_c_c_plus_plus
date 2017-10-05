@@ -1,0 +1,150 @@
+/*
+ * Решение проблемы дедлока может быть решено следующим образом:
+ * можно использовать предопределённый порядок в функции deposit().
+ * Тогда в таком случае каждый тред будет блокироваться на основе
+ * идентификатора банковского счёта, определённого при инициализации
+ * структуры.
+ */
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+typedef struct {
+    int balance;
+    pthread_mutex_t balance_mutex;
+    unsigned int id; /* Should never be changed after initialized */
+} bank_account;
+
+typedef struct {
+    bank_account *from;
+    bank_account *to;
+    int amount;
+} deposit_thr_args;
+
+unsigned int global_id = 1;
+
+void create_bank_account(bank_account **ba, int initial_amount) {
+    int result = 0;
+    bank_account *nba = (bank_account *)malloc(sizeof(bank_account));
+    if (nba == NULL) {
+        /* Handle error */
+    }
+
+    nba->balance = initial_amount;
+    result = pthread_mutex_init(&nba->balance_mutex, NULL);
+    if (result) {
+        /* Handle error */
+    }
+
+    nba->id = global_id++;
+    *ba = nba;
+}
+
+void *deposit(void *ptr) {
+    int result = 0;
+    deposit_thr_args *args = (deposit_thr_args *)ptr;
+
+    if (args->from->id == args->to->id) {
+        return NULL;
+    }
+
+    /* Ensure proper ordering for locking */
+    if (args->from->id < args->to->id) {
+        printf("FROM: %u, BEFORE LOCKING %u\n", args->from->id, args->from->id);
+        if ((result = pthread_mutex_lock(&(args->from->balance_mutex))) != 0) {
+            /* Handle error */
+        }
+        printf("FROM: %u, AFTER LOCKING %u\n", args->from->id, args->from->id);
+        sleep(2);
+        printf("FROM: %u, BEFORE LOCKING %u\n", args->from->id, args->to->id);
+        if ((result = pthread_mutex_lock(&(args->to->balance_mutex))) != 0) {
+            /* Handle error */
+        }
+        printf("FROM: %u, AFTER LOCKING %u\n", args->from->id, args->to->id);
+    }
+    else {
+        printf("FROM: %u, BEFORE LOCKING %u\n", args->from->id, args->to->id);
+        if ((result = pthread_mutex_lock(&(args->to->balance_mutex))) != 0) {
+            /* Handle error */
+        }
+        printf("FROM: %u, AFTER LOCKING %u\n", args->from->id, args->to->id);
+        sleep(2);
+        printf("FROM: %u, BEFORE LOCKING %u\n", args->from->id, args->from->id);
+        if ((result = pthread_mutex_lock(&(args->from->balance_mutex))) != 0) {
+            /* Handle error */
+        }
+        printf("FROM: %u, AFTER LOCKING %u\n", args->from->id, args->from->id);
+    }
+
+    /* Not enough balance to transfer */
+    if (args->from->balance < args->amount) {
+        printf("FROM: %u, BEFORE UNLOCKING %u\n", args->from->id, args->from->id);
+        if ((result = pthread_mutex_unlock(&(args->from->balance_mutex))) != 0) {
+            /* Handle error */
+        }
+        printf("FROM: %u, AFTER UNLOCKING %u\n", args->from->id, args->from->id);
+        printf("FROM: %u, BEFORE UNLOCKING %u\n", args->from->id, args->to->id);
+        if ((result = pthread_mutex_unlock(&(args->to->balance_mutex))) != 0) {
+            /* Handle error */
+        }
+        printf("FROM: %u, AFTER UNLOCKING %u\n", args->from->id, args->to->id);
+        return NULL;
+    }
+
+    args->from->balance -= args->amount;
+    args->to->balance += args->amount;
+
+    printf("FROM: %u, BEFORE UNLOCKING %u\n", args->from->id, args->from->id);
+    if ((result = pthread_mutex_unlock(&(args->from->balance_mutex))) != 0) {
+        /*  Handle error */
+    }
+    printf("FROM: %u, AFTER UNLOCKING %u\n", args->from->id, args->from->id);
+    printf("FROM: %u, BEFORE UNLOCKING %u\n", args->from->id, args->to->id);
+    if ((result = pthread_mutex_unlock(&(args->to->balance_mutex))) != 0) {
+        /* Handle error */
+    }
+    printf("FROM: %u, AFTER UNLOCKING %u\n", args->from->id, args->to->id);
+
+    free(ptr);
+    return NULL;
+}
+
+int main(int argc, char *argv[]) {
+    pthread_t thr1, thr2;
+    int result = 0;
+
+    bank_account *ba1 = NULL;
+    bank_account *ba2 = NULL;
+    create_bank_account(&ba1, 1000);
+    create_bank_account(&ba2, 1000);
+
+    deposit_thr_args *arg1 = (deposit_thr_args *)malloc(sizeof(deposit_thr_args));
+    if (arg1 == NULL) {
+        /* Handle error */
+    }
+    deposit_thr_args *arg2 = (deposit_thr_args *)malloc(sizeof(deposit_thr_args));
+    if (arg2 == NULL) {
+        /* Handle error */
+    }
+
+    arg1->from = ba1;
+    arg1->to = ba2;
+    arg1->amount = 100;
+
+    arg2->from = ba2;
+    arg2->to = ba1;
+    arg2->amount = 100;
+
+    /* Perform the deposits */
+    if ((result = pthread_create(&thr1, NULL, deposit, (void *)arg1)) != 0) {
+        /* Handle error */
+    }
+    if ((result = pthread_create(&thr2, NULL, deposit, (void *)arg2)) != 0) {
+        /* Handle error */
+    }
+
+    pthread_exit(NULL);
+    return 0;
+}
