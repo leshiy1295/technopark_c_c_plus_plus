@@ -218,10 +218,22 @@ void print_escaped_string(const char * const str, const char * const patterns) {
     }
 }
 
+/* Does not allocate new memory. Only returns pointer to substring in original string */
+char *get_url_substring_without_schema(char * str) {
+    const char *pattern = "://";
+    char *result = str;
+    result = strstr(str, pattern);
+    if (!result) {
+        return str;
+    }
+    result += strlen(pattern);
+    return result;
+}
+
 /* Prints struct in JSON format in <code> tag */
 void print(const struct team * const team) {
     const char symbols_to_escape[] = "\\\"";
-    printf("<code class=\"cpp\">\n");
+    printf("<code class=\"cpp\">");
     printf("{\t\n");
     printf("\t\"name\": \"");
     char *output_string = get_trimmed_string(team->name);
@@ -266,8 +278,10 @@ void print(const struct team * const team) {
         printf("\",\n");
         printf("\t\t\t\"group\": \"АПО-1%d\",\n", team->members[i].group);
         printf("\t\t\t\"link_to_git_profile\": \"");
-        output_string = get_trimmed_string(team->members[i].link_to_git_profile);
-        print_escaped_string(output_string ? output_string : team->members[i].link_to_git_profile, symbols_to_escape);
+        /* A little hack - technopark portal transforms links with schema in html tags */
+        char *url_without_schema = get_url_substring_without_schema(team->members[i].link_to_git_profile);
+        output_string = get_trimmed_string(url_without_schema);
+        print_escaped_string(output_string ? output_string : url_without_schema, symbols_to_escape);
         if (output_string) {
             free(output_string);
         }
