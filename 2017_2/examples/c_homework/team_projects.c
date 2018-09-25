@@ -23,7 +23,48 @@ struct team {
     } project;
     size_t size;
     struct student *members;
+    char *lead;
 };
+
+char input_char();
+
+/* Returns NULL on failure */
+char *input_string();
+
+/* Returns 0 on failure */
+int input_int();
+
+/* Creates new team. Returns false on failure */
+bool create(struct team **new_team_p);
+
+bool is_space(char c);
+
+/* Returns new allocated string or NULL on error */
+char *get_trimmed_string(char const * const str);
+
+/* Add backslashes before pattern characters in second parameter */
+void print_escaped_string(const char * const str, const char symbols_to_escape[]);
+
+/* Does not allocate new memory. Only returns pointer to substring in original string */
+char *get_url_substring_without_schema(char * str);
+
+/* Prints trimmed and espaced string */
+void print_formatted_string(const char * const string, const char symbols_to_escape[]);
+
+/* Prints struct in JSON format in <code> tag */
+void print_team_as_json(const struct team * const team);
+
+void delete(struct team *team);
+
+int main(int argc, char *argv[]) {
+    struct team *new_team = NULL;
+    bool success = create(&new_team);
+    if (success) {
+        print_team_as_json(new_team);
+    }
+    delete(new_team);
+    return 0;
+}
 
 char input_char() {
     char c = '\0';
@@ -34,7 +75,6 @@ char input_char() {
     return c;
 }
 
-/* Returns NULL on failure */
 char *input_string() {
     struct buffer {
         char *string;
@@ -66,7 +106,6 @@ char *input_string() {
     return buf.string;
 }
 
-/* Returns 0 on failure */
 int input_int() {
     char c = '\0';
     int result = 0;
@@ -83,7 +122,6 @@ int input_int() {
     return result;
 }
 
-/* Creates new team. Returns false on failure */
 bool create(struct team **new_team_p) {
     if (!new_team_p) {
         return false;
@@ -158,6 +196,19 @@ bool create(struct team **new_team_p) {
         }
         new_team->members[i].link_to_git_profile = string;
     }
+    int team_lead_idx = 0;
+    do {
+        printf("Введите номер члена команды, который будет выполнять роль лидера: (1..%d)\n", size);
+        team_lead_idx = input_int();
+    } while (!(team_lead_idx >= 1 && team_lead_idx <= size));
+    struct student team_lead_member = new_team->members[team_lead_idx - 1];
+    new_team->lead = (char *)malloc(strlen(team_lead_member.name) + strlen(team_lead_member.surname) + 2);
+    if (!new_team->lead) {
+      return false;
+    }
+    strcpy(new_team->lead, team_lead_member.name);
+    strcat(new_team->lead, " ");
+    strcat(new_team->lead, team_lead_member.surname);
     return true;
 }
 
@@ -165,7 +216,6 @@ bool is_space(char c) {
     return c == ' ' || c == '\t';
 }
 
-/* Returns new allocated string or NULL on error */
 char *get_trimmed_string(char const * const str) {
     if (!str) {
         return NULL;
@@ -206,11 +256,10 @@ char *get_trimmed_string(char const * const str) {
     return result;
 }
 
-/* Add backslashes before pattern characters in second parameter */
-void print_escaped_string(const char * const str, const char * const patterns) {
+void print_escaped_string(const char * const str, const char symbols_to_escape[]) {
     size_t i = 0;
     while (str[i] != '\0') {
-        if (strchr(patterns, str[i])) {
+        if (strchr(symbols_to_escape, str[i])) {
             printf("\\");
         }
         printf("%c", str[i]);
@@ -218,7 +267,6 @@ void print_escaped_string(const char * const str, const char * const patterns) {
     }
 }
 
-/* Does not allocate new memory. Only returns pointer to substring in original string */
 char *get_url_substring_without_schema(char * str) {
     const char *pattern = "://";
     char *result = str;
@@ -230,32 +278,29 @@ char *get_url_substring_without_schema(char * str) {
     return result;
 }
 
-/* Prints struct in JSON format in <code> tag */
-void print(const struct team * const team) {
+void print_formatted_string(const char * const string, const char symbols_to_escape[]) {
+    char *trimmed_string = NULL;
+    trimmed_string = get_trimmed_string(string);
+    print_escaped_string(trimmed_string ? trimmed_string : string, symbols_to_escape);
+    if (trimmed_string) {
+        free(trimmed_string);
+        trimmed_string = NULL;
+    }
+}
+
+void print_team_as_json(const struct team * const team) {
     const char symbols_to_escape[] = "\\\"";
     printf("<code class=\"cpp\">");
     printf("{\t\n");
     printf("\t\"name\": \"");
-    char *output_string = get_trimmed_string(team->name);
-    print_escaped_string(output_string ? output_string : team->name, symbols_to_escape);
-    if (output_string) {
-        free(output_string);
-    }
+    print_formatted_string(team->name, symbols_to_escape);
     printf("\",\n");
     printf("\t\"project\": {\n");
     printf("\t\t\"name\": \"");
-    output_string = get_trimmed_string(team->project.name);
-    print_escaped_string(output_string ? output_string : team->project.name, symbols_to_escape);
-    if (output_string) {
-        free(output_string);
-    }
+    print_formatted_string(team->project.name, symbols_to_escape);
     printf("\",\n");
     printf("\t\t\"description\": \"");
-    output_string = get_trimmed_string(team->project.description);
-    print_escaped_string(output_string ? output_string : team->project.description, symbols_to_escape);
-    if (output_string) {
-        free(output_string);
-    }
+    print_formatted_string(team->project.description, symbols_to_escape);
     printf("\"\n");
     printf("\t},\n");
     printf("\t\"size\": %ld,\n", team->size);
@@ -263,33 +308,23 @@ void print(const struct team * const team) {
     for (size_t i = 0; i < team->size; ++i) {
         printf("\t\t{\n");
         printf("\t\t\t\"name\": \"");
-        output_string = get_trimmed_string(team->members[i].name);
-        print_escaped_string(output_string ? output_string : team->members[i].name, symbols_to_escape);
-        if (output_string) {
-            free(output_string);
-        }
+        print_formatted_string(team->members[i].name, symbols_to_escape);
         printf("\",\n");
         printf("\t\t\t\"surname\": \"");
-        output_string = get_trimmed_string(team->members[i].surname);
-        print_escaped_string(output_string ? output_string : team->members[i].surname, symbols_to_escape);
-        if (output_string) {
-            free(output_string);
-        }
+        print_formatted_string(team->members[i].surname, symbols_to_escape);
         printf("\",\n");
         printf("\t\t\t\"group\": \"АПО-1%d\",\n", team->members[i].group);
         printf("\t\t\t\"link_to_git_profile\": \"");
         /* A little hack - technopark portal transforms links with schema in html tags */
         char *url_without_schema = get_url_substring_without_schema(team->members[i].link_to_git_profile);
-        output_string = get_trimmed_string(url_without_schema);
-        print_escaped_string(output_string ? output_string : url_without_schema, symbols_to_escape);
-        if (output_string) {
-            free(output_string);
-        }
+        print_formatted_string(url_without_schema, symbols_to_escape);
         printf("\"\n");
         printf("\t\t}%c\n", i + 1 != team->size ? ',' : ' ');
     }
-    printf("\t]\n");
-    printf("}\n");
+    printf("\t],\n");
+    printf("\t\"team_lead\": \"");
+    print_formatted_string(team->lead, symbols_to_escape);
+    printf("\n}");
     printf("</code>\n");
 }
 
@@ -320,15 +355,9 @@ void delete(struct team *team) {
     if (team->members) {
         free(team->members);
     }
+    if (team->lead) {
+        free(team->lead);
+    }
     free(team);
 }
 
-int main(int argc, char *argv[]) {
-    struct team *new_team = NULL;
-    bool success = create(&new_team);
-    if (success) {
-        print(new_team);
-    }
-    delete(new_team);
-    return 0;
-}
