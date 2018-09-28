@@ -42,13 +42,13 @@ bool is_space(char c);
 /* Returns new allocated string or NULL on error */
 char *get_trimmed_string(char const * const str);
 
-/* Add backslashes before pattern characters in second parameter */
+/* Add backslashes before pattern characters in second parameter and print in quotes */
 void print_escaped_string(const char * const str, const char symbols_to_escape[]);
 
 /* Does not allocate new memory. Only returns pointer to substring in original string */
 char *get_url_substring_without_schema(char * str);
 
-/* Prints trimmed and espaced string */
+/* Prints trimmed and espaced quoted string */
 void print_formatted_string(const char * const string, const char symbols_to_escape[]);
 
 /* Prints struct in JSON format in <code> tag */
@@ -258,6 +258,7 @@ char *get_trimmed_string(char const * const str) {
 
 void print_escaped_string(const char * const str, const char symbols_to_escape[]) {
     size_t i = 0;
+    printf("\"");
     while (str[i] != '\0') {
         if (strchr(symbols_to_escape, str[i])) {
             printf("\\");
@@ -265,6 +266,7 @@ void print_escaped_string(const char * const str, const char symbols_to_escape[]
         printf("%c", str[i]);
         ++i;
     }
+    printf("\"");
 }
 
 char *get_url_substring_without_schema(char * str) {
@@ -292,39 +294,39 @@ void print_team_as_json(const struct team * const team) {
     const char symbols_to_escape[] = "\\\"";
     printf("<code class=\"cpp\">");
     printf("{\t\n");
-    printf("\t\"name\": \"");
+    printf("\t\"name\": ");
     print_formatted_string(team->name, symbols_to_escape);
-    printf("\",\n");
+    printf(",\n");
     printf("\t\"project\": {\n");
-    printf("\t\t\"name\": \"");
+    printf("\t\t\"name\": ");
     print_formatted_string(team->project.name, symbols_to_escape);
-    printf("\",\n");
-    printf("\t\t\"description\": \"");
+    printf(",\n");
+    printf("\t\t\"description\": ");
     print_formatted_string(team->project.description, symbols_to_escape);
-    printf("\"\n");
+    printf("\n");
     printf("\t},\n");
     printf("\t\"size\": %ld,\n", team->size);
     printf("\t\"members\": [\n");
     for (size_t i = 0; i < team->size; ++i) {
         printf("\t\t{\n");
-        printf("\t\t\t\"name\": \"");
+        printf("\t\t\t\"name\": ");
         print_formatted_string(team->members[i].name, symbols_to_escape);
-        printf("\",\n");
-        printf("\t\t\t\"surname\": \"");
+        printf(",\n");
+        printf("\t\t\t\"surname\": ");
         print_formatted_string(team->members[i].surname, symbols_to_escape);
-        printf("\",\n");
+        printf(",\n");
         printf("\t\t\t\"group\": \"АПО-1%d\",\n", team->members[i].group);
-        printf("\t\t\t\"link_to_git_profile\": \"");
+        printf("\t\t\t\"link_to_git_profile\": ");
         /* A little hack - technopark portal transforms links with schema in html tags */
         char *url_without_schema = get_url_substring_without_schema(team->members[i].link_to_git_profile);
         print_formatted_string(url_without_schema, symbols_to_escape);
-        printf("\"\n");
+        printf("\n");
         printf("\t\t}%c\n", i + 1 != team->size ? ',' : ' ');
     }
     printf("\t],\n");
-    printf("\t\"team_lead\": \"");
+    printf("\t\"team_lead\": ");
     print_formatted_string(team->lead, symbols_to_escape);
-    printf("\"\n}");
+    printf("\n}");
     printf("</code>\n");
 }
 
