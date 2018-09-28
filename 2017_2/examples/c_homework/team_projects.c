@@ -324,7 +324,7 @@ void print_team_as_json(const struct team * const team) {
     printf("\t],\n");
     printf("\t\"team_lead\": \"");
     print_formatted_string(team->lead, symbols_to_escape);
-    printf("\n}");
+    printf("\"\n}");
     printf("</code>\n");
 }
 
