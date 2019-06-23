@@ -1,6 +1,8 @@
+#include <iostream>
+
 struct A {
     /* BAD */
-    ~A() /* noexcept */ { // try to uncomment it
+    ~A()  noexcept  { // try to uncomment it
         throw "Exception";
     }
 };
@@ -12,7 +14,12 @@ struct B {
 };
 
 int main(int argc, char *argv[]) {
-    A a;
+    try {
+        A a;
+    } catch(...) {
+        std::cout << "catched";
+    }
+
     B b;
     return 0;
 }

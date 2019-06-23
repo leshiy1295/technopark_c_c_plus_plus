@@ -104,3 +104,35 @@ int main(int argc, char *argv[]) {
     GoodSingleton::getInstance().print();
     return 0;
 }
+
+
+template <class Type>
+class Singleton {
+public:
+    static Type& GetInstance() {
+      Type* instance = atomic_instance_.load();
+      if (!instance) {
+        std::lock_guard<std::mutex> lock(initialization_mutex_);
+        instance = atomic_instance_.load();
+        if (!instance) {
+          instance = new Type;
+          atomic_instance_.store(instance);
+        }
+      }
+
+      return *instance;
+    }
+
+protected:
+    Singleton() {}
+    ~Singleton() {}
+
+private:
+    static std::mutex initialization_mutex_;
+    static std::atomic<Type*> atomic_instance_;
+};
+
+template <class Type>
+std::mutex Singleton<Type>::initialization_mutex_;
+template <class Type>
+std::atomic<Type*> Singleton<Type>::atomic_instance_;

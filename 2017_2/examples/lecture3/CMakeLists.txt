@@ -1,0 +1,49 @@
+cmake_minimum_required(VERSION 3.8)
+project(examples)
+
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -Wall -ggdb3")
+
+
+add_executable(001_encapsulation 001_encapsulation.cpp)
+add_executable(002_namespaces 002_namespaces.cpp)
+add_executable(003_initialization_without_constructor 003_initialization_without_constructor.cpp)
+add_executable(004_default_contructor 004_default_contructor.cpp)
+add_executable(005_required_default_constructor_for_array 005_required_default_constructor_for_array.cpp)
+add_executable(006_constructor_with_one_argument 006_constructor_with_one_argument.cpp)
+
+add_executable(007_private_constructor 007_private_constructor.cpp)
+add_executable(008_default_copy_constructor_and_assign_operator 008_default_copy_constructor_and_assign_operator.cpp)
+add_executable(009_transform_constuctors_and_operations 009_transform_constuctors_and_operations.cpp)
+add_executable(010_initializer_list_vs_constructor_body 010_initializer_list_vs_constructor_body.cpp)
+
+add_executable(011_destructors 011_destructors.cpp)
+add_executable(012_placement_new 012_placement_new.cpp)
+add_executable(013_simple_initializers_in_cpp11 013_simple_initializers_in_cpp11.cpp)
+add_executable(014_move_constructor 014_move_constructor.cpp)
+add_executable(015_move_assignment 015_move_assignment.cpp)
+
+add_executable(016_assignment_via_constructor 016_assignment_via_constructor.cpp)
+add_executable(017_defaults_constructors 017_defaults_constructors.cpp)
+add_executable(018_trivial_constructors 018_trivial_constructors.cpp)
+add_executable(019_delete_and_default_methods 019_delete_and_default_methods.cpp)
+
+add_executable(020_RVO_NRVO 020_RVO_NRVO.cpp)
+add_executable(021_RAII 021_RAII.cpp)
+add_executable(022_undefined_sizeof 022_undefined_sizeof.cpp)
+add_executable(023_noexcept_destructor 023_noexcept_destructor.cpp)
+add_executable(024_using_conflicts 024_using_conflicts.cpp)
+add_executable(025_contr_order 025_contr_order.cpp)
+add_executable(026_dimond_inheritance 026_diamond_inheritance.cpp)
+add_executable(027_RTTI 027_RTTI.cpp)
+add_executable(028_elimination 028_elimination.cpp)
+add_executable(029_abstract_factory 029_abstract_factory.cpp)
+add_executable(030_adapter 030_adapter.cpp)
+add_executable(031_bridge 031_bridge.cpp)
+add_executable(032_command 032_command.cpp)
+add_executable(033_observer 033_observer.cpp)
+add_executable(034_visitor 034_visitor.cpp)
+
+

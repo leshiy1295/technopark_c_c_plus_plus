@@ -1,3 +1,5 @@
 /examples_valgrind/build
 *.kate-swp
 .ipynb_checkpoints
+2017_2/examples/lecture3/cmake-build-debug
+2017_2/examples/lecture3/.idea
