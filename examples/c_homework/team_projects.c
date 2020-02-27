@@ -51,7 +51,7 @@ char *get_url_substring_without_schema(char * str);
 /* Prints trimmed and espaced quoted string */
 void print_formatted_string(const char * const string, const char symbols_to_escape[]);
 
-/* Prints struct in JSON format in <code> tag */
+/* Prints struct in JSON format */
 void print_team_as_json(const struct team * const team);
 
 void delete(struct team *team);
@@ -292,7 +292,6 @@ void print_formatted_string(const char * const string, const char symbols_to_esc
 
 void print_team_as_json(const struct team * const team) {
     const char symbols_to_escape[] = "\\\"";
-    printf("<code class=\"cpp\">");
     printf("{\t\n");
     printf("\t\"name\": ");
     print_formatted_string(team->name, symbols_to_escape);
@@ -327,7 +326,6 @@ void print_team_as_json(const struct team * const team) {
     printf("\t\"team_lead\": ");
     print_formatted_string(team->lead, symbols_to_escape);
     printf("\n}");
-    printf("</code>\n");
 }
 
 void delete(struct team *team) {
