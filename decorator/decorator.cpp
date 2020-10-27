@@ -18,6 +18,7 @@ bool Data::write(const std::string &path)
 
 bool DataDecorator::read(const std::string &path)
 {
+  //std::cout << "DataDecorator:read" << std::endl;
   return m_data->read(path);
 }
 
@@ -30,14 +31,16 @@ bool DataDecorator::write(const std::string &path)
 
 bool EncryptionDecorator::read(const std::string &path)
 {
-   bool res = DataDecorator::read(path);
+  //std::cout << "EncryptionDecorator:read" << std::endl;
 
-   if (!res)
-     return res;
-   
-   decrypt("Text from Data");
+  bool res = DataDecorator::read(path);
 
-   return true;
+  if (!res)
+    return res;
+
+  decrypt("Text from Data");
+
+  return true;
 }
 
 bool EncryptionDecorator::write(const std::string &path)
@@ -63,6 +66,7 @@ void EncryptionDecorator::decrypt(const std::string &text)
 
 bool CompressionDecorator::read(const std::string &path)
 {
+   //std::cout << "CompressionDecorator:read" << std::endl;
    bool res = DataDecorator::read(path);
 
    if (!res)

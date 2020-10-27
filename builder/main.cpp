@@ -37,13 +37,13 @@ protected:
 public:
     PizzaBuilder() {}
     virtual ~PizzaBuilder() {}
+    
     std::shared_ptr<Pizza> GetPizza() { return pizza; }
-
     void createNewPizzaProduct() { pizza.reset (new Pizza); }
 
-    virtual void buildDough()=0;
-    virtual void buildSauce()=0;
-    virtual void buildTopping()=0;
+    virtual void buildDough() = 0;
+    virtual void buildSauce() = 0;
+    virtual void buildTopping() = 0;
 
 };
 
@@ -82,12 +82,14 @@ public:
 
     void SetPizzaBuilder(PizzaBuilder* b) { pizzaBuilder = b; }
     std::shared_ptr<Pizza> GetPizza() { return pizzaBuilder->GetPizza(); }
-    void ConstructPizza()
+
+    std::shared_ptr<Pizza> ConstructPizza()
     {
         pizzaBuilder->createNewPizzaProduct();
         pizzaBuilder->buildDough();
         pizzaBuilder->buildSauce();
         pizzaBuilder->buildTopping();
+        pizzaBuilder->GetPizza();
     }
 };
 
@@ -98,14 +100,12 @@ int main()
 
     HawaiianPizzaBuilder hawaiianPizzaBuilder;
     waiter.SetPizzaBuilder (&hawaiianPizzaBuilder);
-    waiter.ConstructPizza();
-    std::shared_ptr<Pizza> pizza = waiter.GetPizza();
+    std::shared_ptr<Pizza> pizza = waiter.ConstructPizza();
     pizza->ShowPizza();
 
     SpicyPizzaBuilder spicyPizzaBuilder;
     waiter.SetPizzaBuilder(&spicyPizzaBuilder);
-    waiter.ConstructPizza();
-    pizza = waiter.GetPizza();
+    pizza = waiter.ConstructPizza();
     pizza->ShowPizza();
 
     return EXIT_SUCCESS;

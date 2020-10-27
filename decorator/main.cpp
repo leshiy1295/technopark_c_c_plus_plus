@@ -5,7 +5,6 @@ int main()
   
   Data *data = new Data();
 
-  data = new DataDecorator(data);
   data = new EncryptionDecorator(data);
   data = new CompressionDecorator(data);
 
