@@ -6,11 +6,13 @@
 #define MIN_TEAM_SIZE 3
 #define MAX_TEAM_SIZE 4
 
-enum group_id {APO_11 = 1, APO_12, APO_13};
+enum track_id {_ML = 1, _WEB};
+enum group_id {_11 = 1, _12, _13};
 
 struct student {
     char *name;
     char *surname;
+    enum track_id track;
     enum group_id group;
     char *link_to_git_profile;
 };
@@ -56,7 +58,7 @@ void print_team_as_json(const struct team * const team);
 
 void delete(struct team *team);
 
-int main(int argc, char *argv[]) {
+int main() {
     struct team *new_team = NULL;
     bool success = create(&new_team);
     if (success) {
@@ -167,10 +169,7 @@ bool create(struct team **new_team_p) {
         return false;
     }
     for (size_t i = 0; i < new_team->size; ++i) {
-        new_team->members[i].name = NULL;
-        new_team->members[i].surname = NULL;
-        new_team->members[i].link_to_git_profile = NULL;
-        new_team->members[i].group = APO_11;
+        new_team->members[i] = (struct student){};
         printf("Введите имя члена команды № %ld\n", i + 1);
         string = input_string();
         if (!string) {
@@ -183,11 +182,19 @@ bool create(struct team **new_team_p) {
             return false;
         }
         new_team->members[i].surname = string;
+
+        int track = 0;
+        do {
+            printf("Введите номер трека: ML - %d, WEB - %d\n", _ML, _WEB);
+            track = input_int();
+        } while (!(track == _ML || track == _WEB));
+        new_team->members[i].track = track;
+
         int group = 0;
         do {
-            printf("Введите номер группы члена команды № %ld (%d - %d):\n", i + 1, APO_11, APO_13);
+            printf("Введите номер группы члена команды № %ld (%d - %d):\n", i + 1, _11, _13);
             group = input_int();
-        } while (!(group >= APO_11 && group <= APO_13));
+        } while (!(group >= _11 && group <= _13));
         new_team->members[i].group = (size_t)group;
         printf("Введите ссылку на профиль в git-репозитории члена команды № %ld:\n", i + 1);
         string = input_string();
@@ -314,7 +321,7 @@ void print_team_as_json(const struct team * const team) {
         printf("\t\t\t\"surname\": ");
         print_formatted_string(team->members[i].surname, symbols_to_escape);
         printf(",\n");
-        printf("\t\t\t\"group\": \"АПО-1%d\",\n", team->members[i].group);
+        printf("\t\t\t\"group\": \"%s-1%d\",\n", team->members[i].track == _ML ? "ML" : "WEB", team->members[i].group);
         printf("\t\t\t\"link_to_git_profile\": ");
         /* A little hack - technopark portal transforms links with schema in html tags */
         char *url_without_schema = get_url_substring_without_schema(team->members[i].link_to_git_profile);
